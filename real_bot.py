@@ -113,6 +113,8 @@ while True:
             print("BTC 보유 중")
 
             avg_buy_price = upbit.get_avg_buy_price("BTC")
+            if avg_buy_price is None:
+    avg_buy_price = price
 
             target_price = avg_buy_price * 1.02
             stop_price = avg_buy_price * 0.99
