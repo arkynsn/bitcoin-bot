@@ -64,7 +64,7 @@ while True:
 
         print("현재가:", round(price))
         if rsi is None:
-        continue
+            continue
         print("RSI:", round(rsi, 2))
 
         # =====================
