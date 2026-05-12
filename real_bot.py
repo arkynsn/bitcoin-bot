@@ -118,8 +118,28 @@ while True:
             if avg_buy_price is None:
                 avg_buy_price = price
 
-            target_price = avg_buy_price * 1.02
-            stop_price = avg_buy_price * 0.99
+            profit_rate = ((price - avg_buy_price) / avg_buy_price) * 100
+
+print(f"현재 수익률: {profit_rate:.2f}%")
+
+# 익절
+if profit_rate >= 1.5:
+    btc = upbit.get_balance("BTC")
+
+    if btc and btc > 0:
+        upbit.sell_market_order("KRW-BTC", btc)
+        print("익절 매도 완료")
+
+# 손절
+elif profit_rate <= -0.8:
+    btc = upbit.get_balance("BTC")
+
+    if btc and btc > 0:
+        upbit.sell_market_order("KRW-BTC", btc)
+        print("손절 매도 완료")
+
+else:
+    print("보유 유지")
 
             print("평균 매수가:", round(avg_buy_price))
             print("익절 목표:", round(target_price))
