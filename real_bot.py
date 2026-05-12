@@ -50,7 +50,7 @@ while True:
         if price is None:
             continue
         
-    try:
+
 
         print("\n시장 확인 중...")
 
@@ -186,7 +186,7 @@ else:
 
                 print("보유 유지")
 
-    except Exception as e:
+
 
         print("에러:", e)
 
