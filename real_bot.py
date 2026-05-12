@@ -38,8 +38,17 @@ def calculate_rsi(series, period=14):
 coins = ["KRW-BTC", "KRW-ETH", "KRW-XRP", "KRW-SOL"]
 
 while True:
+
     for coin in coins:
-    currency = coin.split("-")[1]
+
+        currency = coin.split("-")[1]
+
+        print(f"{coin} 확인 중")
+
+        price = pyupbit.get_current_price(coin)
+
+        if price is None:
+            continue
         
 
     try:
