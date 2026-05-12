@@ -34,14 +34,32 @@ while True:
         btc_balance = 0
         avg_buy_price = 0
 
-        for b in balances:
+        btc_balance = upbit.get_balance("BTC")
 
-            if b['currency'] == 'BTC':
+if btc_balance is None:
+    btc_balance = 0
 
-                btc_balance = float(b['balance'])
+avg_buy_price = 0
 
-                if b['avg_buy_price'] is not None:
-                    avg_buy_price = float(b['avg_buy_price'])
+balances = upbit.get_balances()
+
+btc_balance = upbit.get_balance("BTC")
+
+if btc_balance is None:
+    btc_balance = 0
+
+avg_buy_price = 0
+
+balances = upbit.get_balances()
+
+for b in balances:
+
+    if isinstance(b, dict):
+
+        if b.get('currency') == 'BTC':
+
+            if b.get('avg_buy_price') is not None:
+                avg_buy_price = float(b['avg_buy_price'])
 
         # BTC 보유 중
         if btc_balance > 0:
