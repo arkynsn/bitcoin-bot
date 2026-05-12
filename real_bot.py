@@ -154,7 +154,7 @@ elif profit_rate <= -0.8:
 else:
     print("보유 유지")
 
-            print("평균 매수가:", round(avg_buy_price))
+        print("평균 매수가:", round(avg_buy_price))
             print("익절 목표:", round(target_price))
             print("손절 가격:", round(stop_price))
 
