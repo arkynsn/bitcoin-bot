@@ -1,24 +1,22 @@
 import pyupbit
 import time
 
-# 업비트 API 키
 access = "HxzMreaqvtoc197sqiqluljcgIB4NNK79UKSB7WP"
 secret = "I2ZDtT1EZqxswZFuDQg6u3qwXnII6GRSZNgi9U9Q"
 
 upbit = pyupbit.Upbit(access, secret)
 
-# 설정
 coin = "KRW-BTC"
 
-take_profit = 1.5   # 익절 %
-stop_loss = -1.0    # 손절 %
+take_profit = 1.5
+stop_loss = -1.0
 
 while True:
 
     try:
+
         print("시장 확인 중...")
 
-        # 현재가
         price = pyupbit.get_current_price(coin)
 
         if price is None:
@@ -28,34 +26,17 @@ while True:
 
         print("현재가:", round(price))
 
-        # 보유 수량 확인
-        balances = upbit.get_balances()
-
-        btc_balance = 0
-        avg_buy_price = 0
-
         btc_balance = upbit.get_balance("BTC")
 
-if btc_balance is None:
-    btc_balance = 0
+        if btc_balance is None:
+            btc_balance = 0
 
-avg_buy_price = 0
+        avg_buy_price = upbit.get_avg_buy_price("KRW-BTC")
 
-balances = upbit.get_balances()
+        if avg_buy_price is None:
+            avg_buy_price = 0
 
-btc_balance = upbit.get_balance("BTC")
-
-if btc_balance is None:
-    btc_balance = 0
-
-avg_buy_price = 0
-
-avg_buy_price = upbit.get_avg_buy_price("KRW-BTC")
-
-if avg_buy_price is None:
-    avg_buy_price = 0
-
-        # BTC 보유 중
+        # 보유 중
         if btc_balance > 0:
 
             print("BTC 보유 중")
@@ -64,24 +45,23 @@ if avg_buy_price is None:
 
             print(f"현재 수익률: {profit_rate:.2f}%")
 
-            # 익절
             if profit_rate >= take_profit:
 
-                print("익절 매도 실행")
+                print("익절 매도")
 
                 upbit.sell_market_order(coin, btc_balance)
 
-            # 손절
             elif profit_rate <= stop_loss:
 
-                print("손절 매도 실행")
+                print("손절 매도")
 
                 upbit.sell_market_order(coin, btc_balance)
 
             else:
+
                 print("보유 유지")
 
-        # BTC 미보유
+        # 미보유
         else:
 
             print("BTC 없음")
