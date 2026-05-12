@@ -1,193 +1,93 @@
 import pyupbit
-import pandas as pd
 import time
 
-# =========================
 # 업비트 API 키
-# =========================
-
 access = "HxzMreaqvtoc197sqiqluljcgIB4NNK79UKSB7WP"
 secret = "I2ZDtT1EZqxswZFuDQg6u3qwXnII6GRSZNgi9U9Q"
 
 upbit = pyupbit.Upbit(access, secret)
 
-# =========================
-# RSI 계산 함수
-# =========================
+# 설정
+coin = "KRW-BTC"
 
-def calculate_rsi(series, period=14):
-
-    delta = series.diff()
-
-    gain = delta.where(delta > 0, 0)
-    loss = -delta.where(delta < 0, 0)
-
-    avg_gain = gain.rolling(period).mean()
-    avg_loss = loss.rolling(period).mean()
-
-    rs = avg_gain / avg_loss
-
-    rsi = 100 - (100 / (1 + rs))
-
-    return rsi
-
-# =========================
-# 메인 반복
-# =========================
-
-coins = ["KRW-BTC", "KRW-ETH", "KRW-XRP", "KRW-SOL"]
+take_profit = 1.5   # 익절 %
+stop_loss = -1.0    # 손절 %
 
 while True:
 
-    for coin in coins:
+    try:
+        print("시장 확인 중...")
 
-        currency = coin.split("-")[1]
-
-        print(f"{coin} 확인 중")
-
+        # 현재가
         price = pyupbit.get_current_price(coin)
 
         if price is None:
+            print("가격 조회 실패")
+            time.sleep(5)
             continue
-        
-
-
-        print("\n시장 확인 중...")
-
-        # BTC 데이터 가져오기
-        df = pyupbit.get_ohlcv(
-            coin,
-            interval="minute60",
-            count=50
-        )
-
-        # 이동평균
-        df['ma10'] = df['close'].rolling(10).mean()
-        df['ma30'] = df['close'].rolling(30).mean()
-
-        # RSI
-        df['rsi'] = calculate_rsi(df['close'])
-
-        latest = df.iloc[-1]
-
-        price = latest['close']
-        ma10 = latest['ma10']
-        ma30 = latest['ma30']
-        rsi = latest['rsi']
 
         print("현재가:", round(price))
-        if rsi is None:
-            continue
-        print("RSI:", round(rsi, 2))
 
-        # =====================
-        # 현재 BTC 보유량 확인
-        # =====================
+        # 보유 수량 확인
+        balances = upbit.get_balances()
 
-        btc_balance = upbit.get_balance(currency)
+        btc_balance = 0
+        avg_buy_price = 0
 
-        # =====================
-        # BTC 없는 경우 → 매수 판단
-        # =====================
+        for b in balances:
 
-        if btc_balance == 0:
+            if b['currency'] == 'BTC':
 
-            print("BTC 미보유 상태")
+                btc_balance = float(b['balance'])
 
-            # 매수 조건
-            if ma10 > ma30 and rsi < 65:
+                if b['avg_buy_price'] is not None:
+                    avg_buy_price = float(b['avg_buy_price'])
 
-                print("매수 조건 만족")
-
-                krw = upbit.get_balance("KRW")
-
-                if krw > 6000:
-
-                    result = upbit.buy_market_order(
-                        coin,
-                        5000
-                    )
-
-                    print("자동 매수 완료")
-                    print(result)
-
-                else:
-
-                    print("원화 부족")
-
-            else:
-
-                print("매수 조건 아님")
-
-        # =====================
-        # BTC 보유 중 → 매도 판단
-        # =====================
-
-        else:
+        # BTC 보유 중
+        if btc_balance > 0:
 
             print("BTC 보유 중")
 
-            avg_buy_price = upbit.get_avg_buy_price("BTC")
-            if avg_buy_price is None:
-                avg_buy_price = price
-
             profit_rate = ((price - avg_buy_price) / avg_buy_price) * 100
 
-print(f"현재 수익률: {profit_rate:.2f}%")
-
-# 익절
-if profit_rate >= 1.5:
-    btc = upbit.get_balance("BTC")
-
-    if btc and btc > 0:
-        upbit.sell_market_order(coin, btc)
-        print("익절 매도 완료")
-
-# 손절
-elif profit_rate <= -0.8:
-    btc = upbit.get_balance("BTC")
-
-    if btc and btc > 0:
-        upbit.sell_market_order(coin, btc)
-        print("손절 매도 완료")
-
-else:
-    print("보유 유지")
-
-            print("익절 목표:", round(target_price))
-            print("손절 가격:", round(stop_price))
+            print(f"현재 수익률: {profit_rate:.2f}%")
 
             # 익절
-            if price >= target_price:
+            if profit_rate >= take_profit:
 
                 print("익절 매도 실행")
 
-                result = upbit.sell_market_order(
-                    coin,
-                    btc_balance
-                )
-
-                print(result)
+                upbit.sell_market_order(coin, btc_balance)
 
             # 손절
-            elif price <= stop_price:
+            elif profit_rate <= stop_loss:
 
                 print("손절 매도 실행")
 
-                result = upbit.sell_market_order(
-                    coin,
-                    btc_balance
-                )
-
-                print(result)
+                upbit.sell_market_order(coin, btc_balance)
 
             else:
-
                 print("보유 유지")
 
+        # BTC 미보유
+        else:
 
+            print("BTC 없음")
 
+            krw = upbit.get_balance("KRW")
 
+            if krw is not None and krw > 5000:
 
-    # 60초마다 반복
-    time.sleep(60)
+                buy_amount = krw * 0.3
+
+                print(f"{round(buy_amount)}원 매수")
+
+                upbit.buy_market_order(coin, buy_amount)
+
+        time.sleep(10)
+
+    except Exception as e:
+
+        print("에러:", e)
+
+        time.sleep(10)
