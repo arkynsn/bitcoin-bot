@@ -8,9 +8,6 @@ upbit = pyupbit.Upbit(access, secret)
 
 coin = "KRW-BTC"
 
-take_profit = 1.5
-stop_loss = -1.0
-
 while True:
 
     try:
@@ -31,50 +28,7 @@ while True:
         if btc_balance is None:
             btc_balance = 0
 
-        avg_buy_price = upbit.get_avg_buy_price("KRW-BTC")
-
-        if avg_buy_price is None:
-            avg_buy_price = 0
-
-        # 보유 중
-        if btc_balance > 0:
-
-            print("BTC 보유 중")
-
-            profit_rate = ((price - avg_buy_price) / avg_buy_price) * 100
-
-            print(f"현재 수익률: {profit_rate:.2f}%")
-
-            if profit_rate >= take_profit:
-
-                print("익절 매도")
-
-                upbit.sell_market_order(coin, btc_balance)
-
-            elif profit_rate <= stop_loss:
-
-                print("손절 매도")
-
-                upbit.sell_market_order(coin, btc_balance)
-
-            else:
-
-                print("보유 유지")
-
-        # 미보유
-        else:
-
-            print("BTC 없음")
-
-            krw = upbit.get_balance("KRW")
-
-            if krw is not None and krw > 5000:
-
-                buy_amount = krw * 0.3
-
-                print(f"{round(buy_amount)}원 매수")
-
-                upbit.buy_market_order(coin, buy_amount)
+        print("BTC 수량:", btc_balance)
 
         time.sleep(10)
 
