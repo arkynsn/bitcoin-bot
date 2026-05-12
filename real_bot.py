@@ -35,7 +35,12 @@ def calculate_rsi(series, period=14):
 # 메인 반복
 # =========================
 
+coins = ["KRW-BTC", "KRW-ETH", "KRW-XRP", "KRW-SOL"]
+
 while True:
+    for coin in coins:
+    currency = coin.split("-")[1]
+        
 
     try:
 
@@ -43,7 +48,7 @@ while True:
 
         # BTC 데이터 가져오기
         df = pyupbit.get_ohlcv(
-            "KRW-BTC",
+            coin,
             interval="minute60",
             count=50
         )
@@ -71,7 +76,7 @@ while True:
         # 현재 BTC 보유량 확인
         # =====================
 
-        btc_balance = upbit.get_balance("BTC")
+        btc_balance = upbit.get_balance(currency)
 
         # =====================
         # BTC 없는 경우 → 매수 판단
@@ -91,7 +96,7 @@ while True:
                 if krw > 6000:
 
                     result = upbit.buy_market_order(
-                        "KRW-BTC",
+                        coin,
                         5000
                     )
 
@@ -127,7 +132,7 @@ if profit_rate >= 1.5:
     btc = upbit.get_balance("BTC")
 
     if btc and btc > 0:
-        upbit.sell_market_order("KRW-BTC", btc)
+        upbit.sell_market_order(coin, btc)
         print("익절 매도 완료")
 
 # 손절
@@ -135,7 +140,7 @@ elif profit_rate <= -0.8:
     btc = upbit.get_balance("BTC")
 
     if btc and btc > 0:
-        upbit.sell_market_order("KRW-BTC", btc)
+        upbit.sell_market_order(coin, btc)
         print("손절 매도 완료")
 
 else:
@@ -151,7 +156,7 @@ else:
                 print("익절 매도 실행")
 
                 result = upbit.sell_market_order(
-                    "KRW-BTC",
+                    coin,
                     btc_balance
                 )
 
@@ -163,7 +168,7 @@ else:
                 print("손절 매도 실행")
 
                 result = upbit.sell_market_order(
-                    "KRW-BTC",
+                    coin,
                     btc_balance
                 )
 
