@@ -188,7 +188,7 @@ else:
 
 
 
-        print("에러:", e)
+
 
     # 60초마다 반복
     time.sleep(60)
