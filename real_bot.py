@@ -50,7 +50,6 @@ while True:
         if price is None:
             continue
         
-
     try:
 
         print("\n시장 확인 중...")
