@@ -50,16 +50,10 @@ if btc_balance is None:
 
 avg_buy_price = 0
 
-balances = upbit.get_balances()
+avg_buy_price = upbit.get_avg_buy_price("KRW-BTC")
 
-for b in balances:
-
-    if isinstance(b, dict):
-
-        if b.get('currency') == 'BTC':
-
-            if b.get('avg_buy_price') is not None:
-                avg_buy_price = float(b['avg_buy_price'])
+if avg_buy_price is None:
+    avg_buy_price = 0
 
         # BTC 보유 중
         if btc_balance > 0:
